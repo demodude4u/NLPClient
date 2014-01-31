@@ -12,7 +12,7 @@ public class ClientMain {
 	public static void main(String[] args) {
 
 		Injector injector = Guice.createInjector(new CommonModule(),
-				new ClientModule("retep998.no-ip.org", 273, "Demod"));
+				new ClientModule("retep998.no-ip.org", 273, "DeBrony"));
 
 		injector.getInstance(Client.class);
 
