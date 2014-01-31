@@ -31,12 +31,14 @@ public abstract class Scene {
 
 	@Inject
 	public void setGameBus(@Named("gamebus") EventBus gameBus) {
+		System.out.println("gameBus: " + gameBus);
 		this.gameBus = gameBus;
 		this.gameBus.register(this);
 	}
 
 	@Inject
-	public void setOutboundBus(@Named("gamebus") EventBus outBus) {
+	public void setOutboundBus(@Named("out") EventBus outBus) {
+		System.out.println("outBus: " + outBus);
 		this.outBus = outBus;
 	}
 

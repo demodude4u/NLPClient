@@ -42,8 +42,7 @@ public class SceneContainer extends JPanel {
 
 	@Inject
 	public SceneContainer(@Named("init") Class<? extends Scene> initialScene,
-			@Named("gamebus") EventBus gameBus,
-			@Named("gamebus") EventBus outBus) {
+			@Named("gamebus") EventBus gameBus, @Named("out") EventBus outBus) {
 		this.gameBus = gameBus;
 		this.outBus = outBus;
 		setLayout(new BorderLayout());

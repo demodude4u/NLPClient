@@ -12,7 +12,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 @Singleton
-public class SocketGameConnection implements GameConnection, SocketDelegate {
+public class SocketConnection {
 
 	private volatile Socket socket = null;
 	private final EventBus incomingBus;
@@ -21,25 +21,20 @@ public class SocketGameConnection implements GameConnection, SocketDelegate {
 	private final int port;
 
 	@Inject
-	public SocketGameConnection(@Named("gamebus") EventBus incomingBus,
+	public SocketConnection(@Named("gamebus") EventBus incomingBus,
 			@Named("out") EventBus outgoingBus, @Named("host") String host,
-			@Named("port") int port,
-			OpCodeSerialization.Factory opCodeSerializationFactory) {
+			@Named("port") int port) {
 		this.incomingBus = incomingBus;
 		this.outgoingBus = outgoingBus;
 		this.host = host;
 		this.port = port;
-
-		opCodeSerializationFactory.create(this, this);
 	}
 
-	@Override
 	public void connect() throws IOException {
 		disconnect();
 		socket = new Socket(InetAddress.getByName(host), port);
 	}
 
-	@Override
 	public void disconnect() throws IOException {
 		if (socket != null) {
 			socket.close();
@@ -47,23 +42,25 @@ public class SocketGameConnection implements GameConnection, SocketDelegate {
 		socket = null;
 	}
 
-	@Override
+	public String getHost() {
+		return host;
+	}
+
 	public EventBus getIncomingBus() {
 		return incomingBus;
 	}
 
-	@Override
 	public InputStream getInputStream() {
 		return new InputStream() {
 			Socket socket = null;
 			private InputStream inputStream;
 
 			@Override
-			public int read() {
+			public int read() throws IOException {
 				while (true) {
 					try {
-						if (socket != SocketGameConnection.this.socket) {
-							socket = SocketGameConnection.this.socket;
+						if (socket != SocketConnection.this.socket) {
+							socket = SocketConnection.this.socket;
 							if (socket == null) {
 								Thread.sleep(100);
 								continue;
@@ -80,36 +77,29 @@ public class SocketGameConnection implements GameConnection, SocketDelegate {
 							continue;
 						}
 						return ret;
-					} catch (Exception e) {
-						e.printStackTrace();
-						try {
-							Thread.sleep(100);
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
-						}
+					} catch (InterruptedException e) {
+						throw new IOException("Interrupted", e);
 					}
 				}
 			}
 		};
 	}
 
-	@Override
 	public EventBus getOutgoingBus() {
 		return outgoingBus;
 	}
 
-	@Override
 	public OutputStream getOutputStream() {
 		return new OutputStream() {
 			Socket socket = null;
 			private OutputStream outputStream;
 
 			@Override
-			public void write(int b) {
+			public void write(int b) throws IOException {
 				while (true) {
 					try {
-						if (socket != SocketGameConnection.this.socket) {
-							socket = SocketGameConnection.this.socket;
+						if (socket != SocketConnection.this.socket) {
+							socket = SocketConnection.this.socket;
 							if (socket == null) {
 								Thread.sleep(100);
 								continue;
@@ -118,20 +108,18 @@ public class SocketGameConnection implements GameConnection, SocketDelegate {
 						}
 						outputStream.write(b);
 						return;
-					} catch (Exception e) {
-						// e.printStackTrace();
-						try {
-							Thread.sleep(100);
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
-						}
+					} catch (InterruptedException e) {
+						throw new IOException("Interrupted", e);
 					}
 				}
 			}
 		};
 	}
 
-	@Override
+	public int getPort() {
+		return port;
+	}
+
 	public boolean isConnected() {
 		return socket != null && socket.isConnected();
 	}

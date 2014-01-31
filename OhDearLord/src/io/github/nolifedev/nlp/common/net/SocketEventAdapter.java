@@ -1,6 +1,8 @@
 package io.github.nolifedev.nlp.common.net;
 
 import io.github.nolifedev.nlp.common.ServiceHandler;
+import io.github.nolifedev.nlp.common.event.net.NetConnect;
+import io.github.nolifedev.nlp.common.event.net.NetDisconnect;
 import io.github.nolifedev.nlp.common.event.net.op.OpNickname;
 import io.github.nolifedev.nlp.common.event.net.op.OpPing;
 import io.github.nolifedev.nlp.common.event.net.op.OpPong;
@@ -16,14 +18,8 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 
-public class OpCodeSerialization extends AbstractExecutionThreadService {
-
-	public interface Factory {
-		public OpCodeSerialization create(SocketDelegate socket,
-				GameConnection gameConnection);
-	}
+public class SocketEventAdapter extends AbstractExecutionThreadService {
 
 	private static String readString(DataInputStream dataIn) throws IOException {
 		byte[] buf = new byte[dataIn.readInt()];
@@ -44,7 +40,7 @@ public class OpCodeSerialization extends AbstractExecutionThreadService {
 		dataOut.write(name.getBytes(StandardCharsets.UTF_8));
 	}
 
-	private final SocketDelegate socket;
+	private final SocketConnection socketConnection;
 	private final DataInputStream dataIn;
 	private final DataOutputStream dataOut;
 
@@ -53,15 +49,14 @@ public class OpCodeSerialization extends AbstractExecutionThreadService {
 	private final EventBus busOut;
 
 	@Inject
-	public OpCodeSerialization(@Assisted SocketDelegate socket,
-			@Assisted GameConnection gameConnection,
+	public SocketEventAdapter(SocketConnection socketConnection,
 			ServiceHandler serviceHandler) {
-		this.socket = socket;
-		dataIn = new DataInputStream(socket.getInputStream());
-		dataOut = new DataOutputStream(socket.getOutputStream());
+		this.socketConnection = socketConnection;
+		dataIn = new DataInputStream(socketConnection.getInputStream());
+		dataOut = new DataOutputStream(socketConnection.getOutputStream());
 
-		busIn = gameConnection.getIncomingBus();
-		busOut = gameConnection.getOutgoingBus();
+		busIn = socketConnection.getIncomingBus();
+		busOut = socketConnection.getOutgoingBus();
 
 		serviceHandler.add(this);
 		busOut.register(this);
@@ -102,9 +97,11 @@ public class OpCodeSerialization extends AbstractExecutionThreadService {
 	@Override
 	protected void run() throws Exception {
 		while (true) {
-			while (!socket.isConnected()) {
+			while (!socketConnection.isConnected()) {
 				try {
-					socket.connect();
+					socketConnection.connect();
+					busIn.post(new NetConnect(socketConnection.getHost(),
+							socketConnection.getPort()));
 				} catch (Exception e) {
 					System.err.println(e.getMessage());
 					Thread.yield();
@@ -114,9 +111,9 @@ public class OpCodeSerialization extends AbstractExecutionThreadService {
 				while (true) {
 					handlePacket();
 				}
-			} catch (Exception e) {
-				System.err.println(e.getMessage());
-				Thread.yield();
+			} catch (IOException e) {
+				socketConnection.disconnect();
+				busIn.post(new NetDisconnect(true, e.getMessage()));
 			}
 		}
 	}
