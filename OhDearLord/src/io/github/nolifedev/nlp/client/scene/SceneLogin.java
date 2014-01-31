@@ -1,7 +1,7 @@
 package io.github.nolifedev.nlp.client.scene;
 
-import io.github.nolifedev.nlp.common.event.net.op.OpNickname;
-import io.github.nolifedev.nlp.common.util.Maths;
+import io.github.nolifedev.nlp.client.util.Maths;
+import io.github.nolifedev.nlp.common.event.net.op.Op0003Nickname;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -61,7 +61,7 @@ public class SceneLogin extends Scene {
 							"Nickname is empty!");
 					return;
 				}
-				getOutBus().post(new OpNickname(nickname));
+				getOutBus().post(new Op0003Nickname(nickname));
 				c.loadScene(SceneLobby.class);
 			}
 		});

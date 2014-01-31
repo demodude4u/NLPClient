@@ -1,4 +1,4 @@
-package io.github.nolifedev.nlp.common.util;
+package io.github.nolifedev.nlp.client.util;
 
 
 import java.awt.Color;

@@ -1,7 +1,7 @@
 package io.github.nolifedev.nlp.client;
 
-import io.github.nolifedev.nlp.common.event.net.op.OpPing;
-import io.github.nolifedev.nlp.common.event.net.op.OpPong;
+import io.github.nolifedev.nlp.common.event.net.op.Op0001Ping;
+import io.github.nolifedev.nlp.common.event.net.op.Op0002Pong;
 import io.github.nolifedev.nlp.common.net.SocketEventAdapter;
 
 import com.google.common.eventbus.EventBus;
@@ -22,8 +22,8 @@ public class Client {
 	}
 
 	@Subscribe
-	public void onPing(OpPing event) {
-		outBus.post(new OpPong(event.getId()));
+	public void onPing(Op0001Ping event) {
+		outBus.post(new Op0002Pong(event.getID()));
 	}
 
 }

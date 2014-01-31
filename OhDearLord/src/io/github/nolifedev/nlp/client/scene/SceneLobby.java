@@ -1,6 +1,6 @@
 package io.github.nolifedev.nlp.client.scene;
 
-import io.github.nolifedev.nlp.common.util.Maths;
+import io.github.nolifedev.nlp.client.util.Maths;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

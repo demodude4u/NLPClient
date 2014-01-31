@@ -4,7 +4,7 @@ import io.github.nolifedev.nlp.common.net.OpCodes;
 import lombok.Data;
 
 @Data
-public class OpOthersJoinServer implements OpEvent {
-	private final int opCode = OpCodes.OthersJoinServer;
-	private final int id;
+public class Op0003Nickname implements OpEvent {
+	private final int opCode = OpCodes.Nickname;
+	private final String name;
 }

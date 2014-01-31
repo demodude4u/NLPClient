@@ -7,7 +7,7 @@ import java.util.Set;
 import lombok.Data;
 
 @Data
-public class OpGamesDeleted implements OpEvent {
-	private final int opCode = OpCodes.GamesDeleted;
-	private final Set<Integer> gameIDs;
+public class Op000DPlayersLeftGame implements OpEvent {
+	private final int opCode = OpCodes.PlayersLeftGame;
+	private final Set<Integer> playerIDs;
 }

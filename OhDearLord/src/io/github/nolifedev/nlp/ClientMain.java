@@ -21,13 +21,13 @@ public class ClientMain {
 			gameBus.register(new Object() {
 				@Subscribe
 				public void onEvent(NLPEvent e) {
-					System.out.println("GAME <><> " + e);
+					System.out.println("GAME <<<< " + e);
 				}
 			});
 			outBus.register(new Object() {
 				@Subscribe
 				public void onEvent(NLPEvent e) {
-					System.out.println("OUT  <><> " + e);
+					System.out.println("OUT  >>>> " + e);
 				}
 			});
 		}
