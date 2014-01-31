@@ -4,10 +4,5 @@ import lombok.Data;
 
 @Data
 public class OpUnknown implements OpEvent {
-
-	@Override
-	public int getOpCode() {
-		return -1;
-	}
-
+	private final int opCode;
 }

@@ -1,12 +1,8 @@
 package io.github.nolifedev.nlp.client.scene;
 
-import io.github.nolifedev.nlp.common.event.net.op.OpPing;
-import io.github.nolifedev.nlp.common.event.net.op.OpPong;
-
 import java.awt.Graphics2D;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -14,41 +10,39 @@ public abstract class Scene {
 
 	private EventBus gameBus;
 	private EventBus outBus;
+	protected SceneContainer c;
 
-	protected void onLoad(SceneContainer c) {
-
-	}
-
-	@Subscribe
-	public void onPing(OpPing event) {
-		getOutBus().post(new OpPong(event.getId()));
-	}
-
-	protected void onUnload(SceneContainer c) {
-	}
-
-	public abstract void render(SceneContainer c, Graphics2D g);
-
-	@Inject
-	public void setGameBus(@Named("gamebus") EventBus gameBus) {
-		System.out.println("gameBus: " + gameBus);
-		this.gameBus = gameBus;
-		this.gameBus.register(this);
-	}
-
-	@Inject
-	public void setOutboundBus(@Named("out") EventBus outBus) {
-		System.out.println("outBus: " + outBus);
-		this.outBus = outBus;
+	public EventBus getGameBus() {
+		return gameBus;
 	}
 
 	public EventBus getOutBus() {
 		return outBus;
 	}
 
-	public EventBus getGameBus() {
-		return gameBus;
+	protected void onLoad() {
+
 	}
 
-	public abstract void tick(SceneContainer c, float timeSeconds);
+	protected void onUnload() {
+	}
+
+	public abstract void render(Graphics2D g);
+
+	@Inject
+	public void setGameBus(@Named("gamebus") EventBus gameBus) {
+		this.gameBus = gameBus;
+	}
+
+	@Inject
+	public void setOutboundBus(@Named("out") EventBus outBus) {
+		this.outBus = outBus;
+	}
+
+	@Inject
+	public void setSceneContainer(SceneContainer c) {
+		this.c = c;
+	}
+
+	public abstract void tick(float timeSeconds);
 }

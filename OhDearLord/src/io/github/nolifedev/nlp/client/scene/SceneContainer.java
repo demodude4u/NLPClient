@@ -25,13 +25,13 @@ public class SceneContainer extends JPanel {
 
 	private static final Scene NO_SCENE = new Scene() {
 		@Override
-		public void render(SceneContainer c, Graphics2D g) {
+		public void render(Graphics2D g) {
 			g.setColor(Color.black);
 			g.fillRect(0, 0, c.getWidth(), c.getHeight());
 		}
 
 		@Override
-		public void tick(SceneContainer c, float timeSeconds) {
+		public void tick(float timeSeconds) {
 		}
 	};
 
@@ -61,7 +61,7 @@ public class SceneContainer extends JPanel {
 		return outBus;
 	}
 
-	private void loadScene(Class<? extends Scene> initialScene) {
+	public void loadScene(Class<? extends Scene> initialScene) {
 		Injector injector = Guice.createInjector(new AbstractModule() {
 			@Override
 			protected void configure() {
@@ -69,12 +69,14 @@ public class SceneContainer extends JPanel {
 						.toInstance(gameBus);
 				bind(EventBus.class).annotatedWith(Names.named("out"))
 						.toInstance(outBus);
+
+				bind(SceneContainer.class).toInstance(SceneContainer.this);
 			}
 		});
 
-		loadedScene.onUnload(this);
+		loadedScene.onUnload();
 		Scene newScene = injector.getInstance(initialScene);
-		newScene.onLoad(this);
+		newScene.onLoad();
 		loadedScene = newScene;
 	}
 
@@ -90,12 +92,12 @@ public class SceneContainer extends JPanel {
 		}
 
 		Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
-		loadedScene.render(this, g);
+		loadedScene.render(g);
 		strategy.show();
 	}
 
 	public void tickScene(float timeSeconds) {
-		loadedScene.tick(this, timeSeconds);
+		loadedScene.tick(timeSeconds);
 	}
 
 }

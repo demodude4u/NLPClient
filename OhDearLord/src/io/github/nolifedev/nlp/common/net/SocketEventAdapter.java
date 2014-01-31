@@ -7,6 +7,7 @@ import io.github.nolifedev.nlp.common.event.net.op.OpNickname;
 import io.github.nolifedev.nlp.common.event.net.op.OpPing;
 import io.github.nolifedev.nlp.common.event.net.op.OpPong;
 import io.github.nolifedev.nlp.common.event.net.op.OpSessionID;
+import io.github.nolifedev.nlp.common.event.net.op.OpUnknown;
 import io.github.nolifedev.nlp.common.util.Unsigned;
 
 import java.io.DataInputStream;
@@ -89,6 +90,7 @@ public class SocketEventAdapter extends AbstractExecutionThreadService {
 		// TODO other opcodes, fix opcodes above
 		default:
 			skipFully(dataIn, (int) (packetLength - 2));
+			busIn.post(new OpUnknown(opCode));
 			break;
 		}
 		dataOut.flush();

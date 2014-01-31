@@ -1,6 +1,7 @@
 package io.github.nolifedev.nlp.client.scene;
 
 import io.github.nolifedev.nlp.common.event.net.op.OpNickname;
+import io.github.nolifedev.nlp.common.util.Maths;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,21 +22,6 @@ import com.google.inject.Inject;
 
 public class SceneLogin extends Scene {
 
-	private static Color interp(Color color1, Color color2, float f) {
-		return new Color(interp(color1.getRed(), color2.getRed(), f), //
-				interp(color1.getGreen(), color2.getGreen(), f), //
-				interp(color1.getBlue(), color2.getBlue(), f), //
-				interp(color1.getAlpha(), color2.getAlpha(), f));
-	}
-
-	private static float interp(float num1, float num2, float f) {
-		return (num1 + (num2 - num1) * f);
-	}
-
-	private static int interp(int num1, int num2, float f) {
-		return (int) (num1 + (num2 - num1) * f);
-	}
-
 	private final JPanel southPanel;
 	private Color bgColor1 = Color.red;
 	private Color bgColor2 = Color.green;
@@ -45,7 +31,6 @@ public class SceneLogin extends Scene {
 	private float bgFY = 0f;
 	private float bgInterpFX = 0f;
 	private float bgInterpFY = 0f;
-
 	private float totalSeconds = 0;
 	private float lastColorChangeSecond = 0;
 
@@ -74,8 +59,10 @@ public class SceneLogin extends Scene {
 				if (nickname.isEmpty()) {
 					JOptionPane.showMessageDialog(southPanel.getParent(),
 							"Nickname is empty!");
+					return;
 				}
 				getOutBus().post(new OpNickname(nickname));
+				c.loadScene(SceneLobby.class);
 			}
 		});
 		ret.add(btnLogin);
@@ -84,17 +71,19 @@ public class SceneLogin extends Scene {
 	}
 
 	@Override
-	protected void onLoad(SceneContainer c) {
+	protected void onLoad() {
 		c.add(southPanel, BorderLayout.SOUTH);
+		c.revalidate();
 	}
 
 	@Override
-	protected void onUnload(SceneContainer c) {
+	protected void onUnload() {
 		c.remove(southPanel);
+		c.revalidate();
 	}
 
 	@Override
-	public void render(SceneContainer c, Graphics2D g) {
+	public void render(Graphics2D g) {
 		float x = bgInterpFX * c.getWidth();
 		float y = bgInterpFY * c.getHeight();
 		g.setPaint(new GradientPaint(new Point2D.Float(x, y), bgInterpColor1,
@@ -104,7 +93,7 @@ public class SceneLogin extends Scene {
 	}
 
 	@Override
-	public void tick(SceneContainer c, float timeSeconds) {
+	public void tick(float timeSeconds) {
 		totalSeconds += timeSeconds;
 		if (totalSeconds - lastColorChangeSecond > 5) {
 			lastColorChangeSecond = totalSeconds;
@@ -119,9 +108,9 @@ public class SceneLogin extends Scene {
 		}
 
 		float interpSpeed = 0.025f;
-		bgInterpColor1 = interp(bgInterpColor1, bgColor1, interpSpeed);
-		bgInterpColor2 = interp(bgInterpColor2, bgColor2, interpSpeed);
-		bgInterpFX = interp(bgInterpFX, bgFX, interpSpeed);
-		bgInterpFY = interp(bgInterpFY, bgFY, interpSpeed);
+		bgInterpColor1 = Maths.interp(bgInterpColor1, bgColor1, interpSpeed);
+		bgInterpColor2 = Maths.interp(bgInterpColor2, bgColor2, interpSpeed);
+		bgInterpFX = Maths.interp(bgInterpFX, bgFX, interpSpeed);
+		bgInterpFY = Maths.interp(bgInterpFY, bgFY, interpSpeed);
 	}
 }
