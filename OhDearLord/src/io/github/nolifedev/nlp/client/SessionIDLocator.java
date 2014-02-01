@@ -11,13 +11,10 @@ import com.google.inject.name.Named;
 @Singleton
 public class SessionIDLocator {
 
-	private final EventBus gameBus;
-
 	private int sessionID = -1;
 
 	@Inject
 	public SessionIDLocator(@Named("gamebus") EventBus gameBus) {
-		this.gameBus = gameBus;
 		gameBus.register(this);
 	}
 

@@ -17,8 +17,10 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+@Singleton
 public class ClientUI extends AbstractScheduledService {
 
 	private static final float SecondsPerFrame = 1f / 30f;

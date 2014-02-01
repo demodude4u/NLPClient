@@ -15,7 +15,8 @@ public class Client {
 
 	@Inject
 	public Client(ClientUI ui, SocketEventAdapter socketEventAdapter,
-			@Named("gamebus") EventBus gameBus, @Named("out") EventBus outBus) {
+			@Named("gamebus") EventBus gameBus, @Named("out") EventBus outBus,
+			PingPongMonitor pingPongMonitor) {
 		this.outBus = outBus;
 
 		gameBus.register(this);

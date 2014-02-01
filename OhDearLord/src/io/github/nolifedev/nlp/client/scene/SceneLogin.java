@@ -8,7 +8,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -22,8 +21,6 @@ import com.google.inject.Inject;
 public class SceneLogin extends Scene {
 
 	private final JPanel southPanel;
-
-	private final Random rand = new Random();
 
 	@Inject
 	public SceneLogin() {

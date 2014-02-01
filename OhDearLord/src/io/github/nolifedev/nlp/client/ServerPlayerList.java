@@ -154,6 +154,7 @@ public class ServerPlayerList extends JPanel {
 	private void updateListUI() {
 		listUI.setListData(mapPlayers.values().toArray(new Player[0]));
 		titledBorder.setTitle("Players Online: " + mapPlayers.size());
+		repaint();
 	}
 
 }

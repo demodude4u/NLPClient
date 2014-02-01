@@ -100,13 +100,6 @@ public class SocketEventAdapter extends AbstractExecutionThreadService {
 		return new String(buf, StandardCharsets.UTF_8);
 	}
 
-	private static void skipFully(DataInput dataIn, int count)
-			throws IOException {
-		while (count > 0) {
-			count -= dataIn.skipBytes(count);
-		}
-	}
-
 	private static <K, V> void writeMap(DataOutput dataOut,
 			IOWriter<K> keyWriter, IOWriter<V> valueWriter, Map<K, V> map)
 			throws IOException {

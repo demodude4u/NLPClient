@@ -109,5 +109,6 @@ public class GamePlayerList extends JPanel {
 	private void updateListUI() {
 		listUI.setListData(players.toArray(new Player[0]));
 		titledBorder.setTitle("Players In Game: " + players.size());
+		repaint();
 	}
 }

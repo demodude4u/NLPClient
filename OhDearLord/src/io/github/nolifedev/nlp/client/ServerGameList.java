@@ -137,5 +137,6 @@ public class ServerGameList extends JPanel {
 	private void updateListUI() {
 		listUI.setListData(mapGames.values().toArray(new Game[0]));
 		titledBorder.setTitle("Games: " + mapGames.size());
+		repaint();
 	}
 }

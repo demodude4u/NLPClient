@@ -4,6 +4,8 @@ import io.github.nolifedev.nlp.client.Client;
 import io.github.nolifedev.nlp.client.ClientModule;
 import io.github.nolifedev.nlp.common.CommonModule;
 import io.github.nolifedev.nlp.common.event.NLPEvent;
+import io.github.nolifedev.nlp.common.event.net.op.Op0001Ping;
+import io.github.nolifedev.nlp.common.event.net.op.Op0002Pong;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -21,12 +23,24 @@ public class ClientMain {
 			gameBus.register(new Object() {
 				@Subscribe
 				public void onEvent(NLPEvent e) {
+					if (e instanceof Op0001Ping) {
+						return;
+					}
+					if (e instanceof Op0002Pong) {
+						return;
+					}
 					System.out.println("GAME <<<< " + e);
 				}
 			});
 			outBus.register(new Object() {
 				@Subscribe
 				public void onEvent(NLPEvent e) {
+					if (e instanceof Op0001Ping) {
+						return;
+					}
+					if (e instanceof Op0002Pong) {
+						return;
+					}
 					System.out.println("OUT  >>>> " + e);
 				}
 			});
