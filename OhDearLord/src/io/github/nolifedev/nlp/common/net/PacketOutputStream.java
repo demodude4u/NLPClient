@@ -26,6 +26,9 @@ public class PacketOutputStream extends OutputStream implements DataOutput {
 
 	@Override
 	public void flush() throws IOException {
+		if (baos.size() == 0) {
+			return;
+		}
 		out.writeInt(baos.size());
 		baos.writeTo(out);
 		baos.reset();

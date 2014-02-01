@@ -4,7 +4,7 @@ import io.github.nolifedev.nlp.common.net.OpCodes;
 import lombok.Data;
 
 @Data
-public class Op0009LeftGame implements OpEvent {
-	private final int opCode = OpCodes.LeftGame;
+public class Op0009LeftJoinedGame implements OpEvent {
+	private final int opCode = OpCodes.LeftJoinedGame;
 	private final int gameID;
 }

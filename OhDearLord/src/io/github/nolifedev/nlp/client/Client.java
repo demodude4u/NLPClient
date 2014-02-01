@@ -22,8 +22,8 @@ public class Client {
 	}
 
 	@Subscribe
-	public void onPing(Op0001Ping event) {
-		outBus.post(new Op0002Pong(event.getID()));
+	public void onPing(Op0001Ping e) {
+		outBus.post(new Op0002Pong(e.getID()));
 	}
 
 }

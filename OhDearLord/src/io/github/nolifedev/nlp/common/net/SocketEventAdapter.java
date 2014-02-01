@@ -11,7 +11,7 @@ import io.github.nolifedev.nlp.common.event.net.op.Op0005DeletedGames;
 import io.github.nolifedev.nlp.common.event.net.op.Op0006CreatedGames;
 import io.github.nolifedev.nlp.common.event.net.op.Op0007CreateJoinGame;
 import io.github.nolifedev.nlp.common.event.net.op.Op0008LeaveJoinGame;
-import io.github.nolifedev.nlp.common.event.net.op.Op0009LeftGame;
+import io.github.nolifedev.nlp.common.event.net.op.Op0009LeftJoinedGame;
 import io.github.nolifedev.nlp.common.event.net.op.Op000BPlayersJoinedServer;
 import io.github.nolifedev.nlp.common.event.net.op.Op000CPlayersJoinedGame;
 import io.github.nolifedev.nlp.common.event.net.op.Op000DPlayersLeftGame;
@@ -20,8 +20,8 @@ import io.github.nolifedev.nlp.common.event.net.op.OpUnknown;
 import io.github.nolifedev.nlp.common.util.Unsigned;
 
 import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.DataOutput;
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -133,7 +133,7 @@ public class SocketEventAdapter extends AbstractExecutionThreadService {
 
 	private final SocketConnection socketConnection;
 
-	private final DataInputStream dataIn;
+	private final PacketInputStream dataIn;
 	private final PacketOutputStream dataOut;
 
 	private final EventBus busIn;
@@ -143,7 +143,7 @@ public class SocketEventAdapter extends AbstractExecutionThreadService {
 	public SocketEventAdapter(SocketConnection socketConnection,
 			ServiceHandler serviceHandler) {
 		this.socketConnection = socketConnection;
-		dataIn = new DataInputStream(socketConnection.getInputStream());
+		dataIn = new PacketInputStream(socketConnection.getInputStream());
 		dataOut = new PacketOutputStream(socketConnection.getOutputStream());
 
 		busIn = socketConnection.getIncomingBus();
@@ -154,84 +154,87 @@ public class SocketEventAdapter extends AbstractExecutionThreadService {
 	}
 
 	private void handlePacket() throws IOException {
-		long packetLength = Unsigned.uInt(dataIn.readInt());
+		int packetLength = dataIn.next();
 		int opCode = Unsigned.uShort(dataIn.readShort());
-		switch (opCode) {
-		case OpCodes.Ping: {
-			int id = dataIn.readInt();
-			busIn.post(new Op0001Ping(id));
-			break;
+		try {
+			switch (opCode) {
+			case OpCodes.Ping: {
+				int id = dataIn.readInt();
+				busIn.post(new Op0001Ping(id));
+				break;
+			}
+			case OpCodes.Pong: {
+				int id = dataIn.readInt();
+				busIn.post(new Op0002Pong(id));
+				break;
+			}
+			case OpCodes.Nickname: {
+				String name = readString(dataIn);
+				busIn.post(new Op0003Nickname(name));
+				break;
+			}
+			case OpCodes.SessionID: {
+				int sessionID = dataIn.readInt();
+				busIn.post(new Op0004SessionID(sessionID));
+				break;
+			}
+			case OpCodes.DeletedGames: {
+				Set<Integer> gameIDs = readSet(dataIn, intReader);
+				busIn.post(new Op0005DeletedGames(gameIDs));
+				break;
+			}
+			case OpCodes.CreatedGames: {
+				Map<Integer, String> gameIDNames = readMap(dataIn, intReader,
+						stringReader);
+				busIn.post(new Op0006CreatedGames(gameIDNames));
+				break;
+			}
+			case OpCodes.CreateJoinGame: {
+				String name = readString(dataIn);
+				busIn.post(new Op0007CreateJoinGame(name));
+				break;
+			}
+			case OpCodes.LeaveJoinGame: {
+				int gameIDValue = dataIn.readInt();
+				Optional<Integer> gameID = gameIDValue == 0 ? Optional
+						.<Integer> absent() : Optional.of(gameIDValue);
+				busIn.post(new Op0008LeaveJoinGame(gameID));
+				break;
+			}
+			case OpCodes.LeftJoinedGame: {
+				int gameID = dataIn.readInt();
+				busIn.post(new Op0009LeftJoinedGame(gameID));
+				break;
+			}
+			case OpCodes.PlayersJoinedServer: {
+				Map<Integer, String> playerIDNames = readMap(dataIn, intReader,
+						stringReader);
+				busIn.post(new Op000BPlayersJoinedServer(playerIDNames));
+				break;
+			}
+			case OpCodes.PlayersJoinedGame: {
+				Set<Integer> playerIDs = readSet(dataIn, intReader);
+				busIn.post(new Op000CPlayersJoinedGame(playerIDs));
+				break;
+			}
+			case OpCodes.PlayersLeftGame: {
+				Set<Integer> playerIDs = readSet(dataIn, intReader);
+				busIn.post(new Op000DPlayersLeftGame(playerIDs));
+				break;
+			}
+			case OpCodes.PlayersLeftServer: {
+				Set<Integer> playerIDs = readSet(dataIn, intReader);
+				busIn.post(new Op000FPlayersLeftServer(playerIDs));
+				break;
+			}
+			default:
+				busIn.post(new OpUnknown(opCode));
+				break;
+			}
+		} catch (EOFException e) {
+			System.err.println("Hit end of packet frame! OpCode=" + opCode
+					+ " Size=" + packetLength);
 		}
-		case OpCodes.Pong: {
-			int id = dataIn.readInt();
-			busIn.post(new Op0002Pong(id));
-			break;
-		}
-		case OpCodes.Nickname: {
-			String name = readString(dataIn);
-			busIn.post(new Op0003Nickname(name));
-			break;
-		}
-		case OpCodes.SessionID: {
-			int sessionID = dataIn.readInt();
-			busIn.post(new Op0004SessionID(sessionID));
-			break;
-		}
-		case OpCodes.DeletedGames: {
-			Set<Integer> gameIDs = readSet(dataIn, intReader);
-			busIn.post(new Op0005DeletedGames(gameIDs));
-			break;
-		}
-		case OpCodes.CreatedGames: {
-			Map<Integer, String> gameIDNames = readMap(dataIn, intReader,
-					stringReader);
-			busIn.post(new Op0006CreatedGames(gameIDNames));
-			break;
-		}
-		case OpCodes.CreateJoinGame: {
-			String name = readString(dataIn);
-			busIn.post(new Op0007CreateJoinGame(name));
-			break;
-		}
-		case OpCodes.LeaveJoinGame: {
-			int gameIDValue = dataIn.readInt();
-			Optional<Integer> gameID = gameIDValue == 0 ? Optional
-					.<Integer> absent() : Optional.of(gameIDValue);
-			busIn.post(new Op0008LeaveJoinGame(gameID));
-			break;
-		}
-		case OpCodes.LeftGame: {
-			int gameID = dataIn.readInt();
-			busIn.post(new Op0009LeftGame(gameID));
-			break;
-		}
-		case OpCodes.PlayersJoinedServer: {
-			Map<Integer, String> playerIDNames = readMap(dataIn, intReader,
-					stringReader);
-			busIn.post(new Op000BPlayersJoinedServer(playerIDNames));
-			break;
-		}
-		case OpCodes.PlayersJoinedGame: {
-			Set<Integer> playerIDs = readSet(dataIn, intReader);
-			busIn.post(new Op000CPlayersJoinedGame(playerIDs));
-			break;
-		}
-		case OpCodes.PlayersLeftGame: {
-			Set<Integer> playerIDs = readSet(dataIn, intReader);
-			busIn.post(new Op000DPlayersLeftGame(playerIDs));
-			break;
-		}
-		case OpCodes.PlayersLeftServer: {
-			Set<Integer> playerIDs = readSet(dataIn, intReader);
-			busIn.post(new Op000FPlayersLeftServer(playerIDs));
-			break;
-		}
-		default:
-			skipFully(dataIn, (int) (packetLength - 2));
-			busIn.post(new OpUnknown(opCode));
-			break;
-		}
-		dataOut.flush();
 	}
 
 	@Override
@@ -253,7 +256,8 @@ public class SocketEventAdapter extends AbstractExecutionThreadService {
 				}
 			} catch (IOException e) {
 				socketConnection.disconnect();
-				busIn.post(new NetDisconnect(true, e.getMessage()));
+				busIn.post(new NetDisconnect(true, "["
+						+ e.getClass().getSimpleName() + "] " + e.getMessage()));
 			}
 		}
 	}
@@ -318,7 +322,8 @@ public class SocketEventAdapter extends AbstractExecutionThreadService {
 	}
 
 	@Subscribe
-	public void sendOp0009LeftGame(Op0009LeftGame e) throws IOException {
+	public void sendOp0009LeftJoinedGame(Op0009LeftJoinedGame e)
+			throws IOException {
 		dataOut.writeShort(e.getOpCode());
 		dataOut.writeInt(e.getGameID());
 		dataOut.flush();
