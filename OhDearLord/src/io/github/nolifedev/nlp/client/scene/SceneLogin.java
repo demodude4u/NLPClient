@@ -1,6 +1,5 @@
 package io.github.nolifedev.nlp.client.scene;
 
-import io.github.nolifedev.nlp.client.event.HaveMyPlayer;
 import io.github.nolifedev.nlp.common.event.net.op.Op0003Nickname;
 
 import java.awt.BorderLayout;
@@ -15,7 +14,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
 public class SceneLogin extends Scene {
@@ -57,27 +55,22 @@ public class SceneLogin extends Scene {
 		return ret;
 	}
 
-	@Subscribe
-	public void onHaveMyPlayer(HaveMyPlayer e) {
-		c.loadScene(SceneLobby.class);
-	}
-
 	@Override
 	protected void onLoad() {
-		c.add(southPanel, BorderLayout.SOUTH);
-		c.revalidate();
+		container.add(southPanel, BorderLayout.SOUTH);
+		container.revalidate();
 	}
 
 	@Override
 	protected void onUnload() {
-		c.remove(southPanel);
-		c.revalidate();
+		container.remove(southPanel);
+		container.revalidate();
 	}
 
 	@Override
 	public void render(Graphics2D g) {
 		g.setColor(Color.black);
-		g.fillRect(0, 0, c.getWidth(), c.getHeight());
+		g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	}
 
 	@Override

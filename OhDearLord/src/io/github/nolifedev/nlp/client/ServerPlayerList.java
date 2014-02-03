@@ -5,7 +5,10 @@ import io.github.nolifedev.nlp.common.event.net.op.Op000BPlayersJoinedServer;
 import io.github.nolifedev.nlp.common.event.net.op.Op000FPlayersLeftServer;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Map;
@@ -24,6 +27,7 @@ import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
@@ -40,13 +44,14 @@ public class ServerPlayerList extends JPanel {
 
 	private final TitledBorder titledBorder;
 
-	private final SessionIDLocator sessionIDLocator;
+	private final MyPlayerIDLocator sessionIDLocator;
 
 	private final EventBus gameBus;
 
 	@Inject
 	public ServerPlayerList(@Named("gamebus") EventBus gameBus,
-			@Named("out") EventBus outBus, SessionIDLocator sessionIDLocator) {
+			@Named("out") EventBus outBus, MyPlayerIDLocator sessionIDLocator,
+			final Provider<ChatPanel> chatPanelProvider) {
 		this.gameBus = gameBus;
 		this.outBus = outBus;
 		this.sessionIDLocator = sessionIDLocator;
@@ -62,13 +67,22 @@ public class ServerPlayerList extends JPanel {
 		add(scrollPane);
 
 		listUI = new JList<Player>();
+		listUI.setForeground(Color.WHITE);
+		listUI.setBackground(Color.DARK_GRAY);
 		scrollPane.setViewportView(listUI);
 
 		JPopupMenu popupMenu = new JPopupMenu();
 		addPopup(listUI, popupMenu);
 
-		JButton btnNop = new JButton("NOP");
-		popupMenu.add(btnNop);
+		JButton btnPrivateMessage = new JButton("Private Message");
+		btnPrivateMessage.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ChatPanel chatPanel = chatPanelProvider.get();
+				chatPanel.setPrivateTarget(listUI.getSelectedValue());
+			}
+		});
+		popupMenu.add(btnPrivateMessage);
 
 		updateListUI();
 	}
@@ -129,7 +143,7 @@ public class ServerPlayerList extends JPanel {
 		Set<Player> players = Sets.newLinkedHashSet();
 		for (Entry<Integer, String> entry : playerIDNames.entrySet()) {
 			Player player = new Player(entry.getKey(), entry.getValue());
-			if (player.getID() == sessionIDLocator.getSessionID()) {
+			if (player.getID() == sessionIDLocator.getPlayerID()) {
 				myPlayer = player;
 				gameBus.post(new HaveMyPlayer(player));
 			}

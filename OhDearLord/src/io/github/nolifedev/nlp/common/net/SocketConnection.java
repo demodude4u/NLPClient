@@ -98,7 +98,8 @@ public class SocketConnection {
 			public void write(int b) throws IOException {
 				while (true) {
 					try {
-						if (socket != SocketConnection.this.socket) {
+						if (socket != SocketConnection.this.socket
+								|| SocketConnection.this.socket == null) {
 							socket = SocketConnection.this.socket;
 							if (socket == null) {
 								Thread.sleep(100);

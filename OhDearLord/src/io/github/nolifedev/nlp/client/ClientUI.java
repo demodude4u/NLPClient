@@ -7,7 +7,6 @@ import io.github.nolifedev.nlp.common.ServiceHandler;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
@@ -33,48 +32,45 @@ public class ClientUI extends AbstractScheduledService {
 			SceneContainer sceneContainer, ServerPlayerList serverPlayerList,
 			ServerGameList serverGameList,
 			@Named("gamebus") final EventBus gameBus,
-			@Named("out") final EventBus outBus) {
+			@Named("out") final EventBus outBus, ChatPanel chatPanel) {
 		this.sceneContainer = sceneContainer;
 
 		serviceHandler.add(this);
 
 		gameBus.register(this);
 
-		frame = constructFrame(sceneContainer, serverPlayerList, serverGameList);
+		frame = constructFrame(sceneContainer, serverPlayerList, chatPanel);
+		// FIXME need proper shutdown
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
 
+	private JPanel constructBottomPanel(ServerPlayerList serverPlayerList,
+			ChatPanel chatPanel) {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+
+		panel.add(chatPanel, BorderLayout.CENTER);
+		panel.add(serverPlayerList, BorderLayout.EAST);
+
+		return panel;
+	}
+
 	private JFrame constructFrame(SceneContainer sceneContainer,
-			ServerPlayerList serverPlayerList, ServerGameList serverGameList) {
+			ServerPlayerList serverPlayerList, ChatPanel chatPanel) {
 		JFrame frame = new JFrame("NoLifePony Client");
 		Container container = frame.getContentPane();
 		container.setLayout(new BorderLayout());
 
-		sceneContainer.setPreferredSize(new Dimension(512, 512));
+		sceneContainer.setPreferredSize(new Dimension(1024, 512));
 		container.add(sceneContainer, BorderLayout.CENTER);
 
-		JPanel rightPanel = constructRightPanel(serverPlayerList,
-				serverGameList);
-		container.add(rightPanel, BorderLayout.EAST);
-
-		// FIXME need proper shutdown
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		frame.pack();
-		frame.setLocationRelativeTo(null);
+		JPanel bottomPanel = constructBottomPanel(serverPlayerList, chatPanel);
+		container.add(bottomPanel, BorderLayout.SOUTH);
 
 		return frame;
-	}
-
-	private JPanel constructRightPanel(ServerPlayerList serverPlayerList,
-			ServerGameList serverGameList) {
-		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(2, 1));
-
-		panel.add(serverPlayerList);
-		panel.add(serverGameList);
-
-		return panel;
 	}
 
 	@Subscribe

@@ -1,5 +1,6 @@
 package io.github.nolifedev.nlp.client.scene;
 
+import io.github.nolifedev.nlp.client.ServerGameList;
 import io.github.nolifedev.nlp.client.util.Maths;
 import io.github.nolifedev.nlp.common.event.net.op.Op0003Nickname;
 import io.github.nolifedev.nlp.common.event.net.op.Op0007CreateJoinGame;
@@ -8,6 +9,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
@@ -26,7 +28,7 @@ import com.google.inject.Inject;
 
 public class SceneLobby extends Scene {
 
-	private final JPanel southPanel;
+	private final JPanel sidePanel;
 
 	private final Random rand = new Random();
 
@@ -42,27 +44,22 @@ public class SceneLobby extends Scene {
 	private float lastColorChangeSecond = 0;
 
 	@Inject
-	public SceneLobby() {
-		southPanel = constructSouthPanel();
+	public SceneLobby(ServerGameList serverGameList) {
+		sidePanel = constructSidePanel(serverGameList);
+	}
+
+	private JPanel constructSidePanel(ServerGameList serverGameList) {
+		JPanel ret = new JPanel();
+		ret.setLayout(new BorderLayout());
+
+		ret.add(serverGameList, BorderLayout.CENTER);
+		ret.add(constructSouthPanel(), BorderLayout.SOUTH);
+
+		return ret;
 	}
 
 	private JPanel constructSouthPanel() {
 		JPanel ret = new JPanel();
-
-		final JButton btnCreateGame = new JButton("Create Game");
-		btnCreateGame.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String newGameName = JOptionPane.showInputDialog(btnCreateGame,
-						"Game name:", "Create Game",
-						JOptionPane.OK_CANCEL_OPTION);
-				if (newGameName == null || newGameName.isEmpty()) {
-					return;
-				}
-				getOutBus().post(new Op0007CreateJoinGame(newGameName));
-			}
-		});
-		ret.add(btnCreateGame);
 
 		{
 			URL url;
@@ -77,44 +74,68 @@ public class SceneLobby extends Scene {
 			}
 		}
 
-		JButton btnChangeNickname = new JButton("Change Nickname");
-		btnChangeNickname.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String newName = JOptionPane.showInputDialog(btnCreateGame,
-						"New nickname:", "Change Nickname",
-						JOptionPane.OK_CANCEL_OPTION);
-				if (newName == null || newName.isEmpty()) {
-					return;
+		{
+			JPanel panel = new JPanel();
+			panel.setLayout(new GridLayout(2, 1));
+
+			final JButton btnCreateGame = new JButton("Create Game");
+			btnCreateGame.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					String newGameName = JOptionPane.showInputDialog(
+							btnCreateGame, "Game name:", "Create Game",
+							JOptionPane.OK_CANCEL_OPTION);
+					if (newGameName == null || newGameName.isEmpty()) {
+						return;
+					}
+					getOutBus().post(new Op0007CreateJoinGame(newGameName));
 				}
-				getOutBus().post(new Op0003Nickname(newName));
-			}
-		});
-		ret.add(btnChangeNickname);
+			});
+			panel.add(btnCreateGame);
+
+			JButton btnChangeNickname = new JButton("Change Nickname");
+			btnChangeNickname.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					String newName = JOptionPane.showInputDialog(btnCreateGame,
+							"New nickname:", "Change Nickname",
+							JOptionPane.OK_CANCEL_OPTION);
+					if (newName == null || newName.isEmpty()) {
+						return;
+					}
+					getOutBus().post(new Op0003Nickname(newName));
+				}
+			});
+			panel.add(btnChangeNickname);
+
+			ret.add(panel);
+		}
 
 		return ret;
 	}
 
 	@Override
 	protected void onLoad() {
-		c.add(southPanel, BorderLayout.SOUTH);
-		c.revalidate();
+		container.add(sidePanel, BorderLayout.EAST);
+		container.revalidate();
 	}
 
 	@Override
 	protected void onUnload() {
-		c.remove(southPanel);
-		c.revalidate();
+		container.remove(sidePanel);
+		container.revalidate();
 	}
 
 	@Override
 	public void render(Graphics2D g) {
-		float x = bgInterpFX * c.getWidth();
-		float y = bgInterpFY * c.getHeight();
-		g.setPaint(new GradientPaint(new Point2D.Float(x, y), bgInterpColor1,
-				new Point2D.Float(c.getWidth() - x, c.getHeight() - y),
+		float x = bgInterpFX * canvas.getWidth();
+		float y = bgInterpFY * canvas.getHeight();
+		g.setPaint(new GradientPaint(
+				new Point2D.Float(x, y),
+				bgInterpColor1,
+				new Point2D.Float(canvas.getWidth() - x, canvas.getHeight() - y),
 				bgInterpColor2));
-		g.fillRect(0, 0, c.getWidth(), c.getHeight());
+		g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	}
 
 	@Override

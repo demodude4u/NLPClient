@@ -4,7 +4,7 @@ import io.github.nolifedev.nlp.common.net.OpCodes;
 import lombok.Data;
 
 @Data
-public class Op0004SessionID implements OpEvent {
-	private final int opCode = OpCodes.SessionID;
-	private final int sessionID;
+public class Op0004PlayerID implements OpEvent {
+	private final int opCode = OpCodes.PlayerID;
+	private final int playerID;
 }

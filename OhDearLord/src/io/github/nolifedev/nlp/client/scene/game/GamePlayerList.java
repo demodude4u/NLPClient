@@ -1,5 +1,6 @@
 package io.github.nolifedev.nlp.client.scene.game;
 
+import io.github.nolifedev.nlp.client.ChatPanel;
 import io.github.nolifedev.nlp.client.Game;
 import io.github.nolifedev.nlp.client.Player;
 import io.github.nolifedev.nlp.client.ServerPlayerList;
@@ -7,7 +8,10 @@ import io.github.nolifedev.nlp.common.event.net.op.Op000CPlayersJoinedGame;
 import io.github.nolifedev.nlp.common.event.net.op.Op000DPlayersLeftGame;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Set;
@@ -39,7 +43,8 @@ public class GamePlayerList extends JPanel {
 
 	@Inject
 	public GamePlayerList(Game game, @Named("gamebus") EventBus gameBus,
-			@Named("out") EventBus outBus, ServerPlayerList serverPlayerList) {
+			@Named("out") EventBus outBus, ServerPlayerList serverPlayerList,
+			final ChatPanel chatPanel) {
 		this.outBus = outBus;
 		this.serverPlayerList = serverPlayerList;
 
@@ -54,13 +59,21 @@ public class GamePlayerList extends JPanel {
 		add(scrollPane);
 
 		listUI = new JList<Player>();
+		listUI.setForeground(Color.WHITE);
+		listUI.setBackground(Color.DARK_GRAY);
 		scrollPane.setViewportView(listUI);
 
 		JPopupMenu popupMenu = new JPopupMenu();
 		addPopup(listUI, popupMenu);
 
-		JButton btnNop = new JButton("NOP");
-		popupMenu.add(btnNop);
+		JButton btnPrivateMessage = new JButton("Private Message");
+		btnPrivateMessage.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				chatPanel.setPrivateTarget(listUI.getSelectedValue());
+			}
+		});
+		popupMenu.add(btnPrivateMessage);
 
 		updateListUI();
 	}

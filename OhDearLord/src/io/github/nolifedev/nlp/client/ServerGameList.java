@@ -2,9 +2,13 @@ package io.github.nolifedev.nlp.client;
 
 import io.github.nolifedev.nlp.common.event.net.op.Op0005DeletedGames;
 import io.github.nolifedev.nlp.common.event.net.op.Op0006CreatedGames;
+import io.github.nolifedev.nlp.common.event.net.op.Op0008LeaveJoinGame;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Map;
@@ -18,6 +22,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -40,7 +45,7 @@ public class ServerGameList extends JPanel {
 
 	@Inject
 	public ServerGameList(@Named("gamebus") EventBus gameBus,
-			@Named("out") EventBus outBus) {
+			@Named("out") final EventBus outBus) {
 		this.outBus = outBus;
 
 		gameBus.register(this);
@@ -54,12 +59,24 @@ public class ServerGameList extends JPanel {
 		add(scrollPane);
 
 		listUI = new JList<Game>();
+		listUI.setForeground(Color.WHITE);
+		listUI.setBackground(Color.DARK_GRAY);
 		scrollPane.setViewportView(listUI);
 
 		JPopupMenu popupMenu = new JPopupMenu();
 		addPopup(listUI, popupMenu);
 
 		JButton btnJoinGame = new JButton("Join Game");
+		btnJoinGame.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Game game = listUI.getSelectedValue();
+				if (game != null) {
+					outBus.post(new Op0008LeaveJoinGame(Optional.of(game
+							.getID())));
+				}
+			}
+		});
 		popupMenu.add(btnJoinGame);
 
 		updateListUI();

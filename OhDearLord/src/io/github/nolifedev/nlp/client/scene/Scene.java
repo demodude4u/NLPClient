@@ -1,5 +1,6 @@
 package io.github.nolifedev.nlp.client.scene;
 
+import java.awt.Canvas;
 import java.awt.Graphics2D;
 
 import com.google.common.eventbus.EventBus;
@@ -10,7 +11,9 @@ public abstract class Scene {
 
 	private EventBus gameBus;
 	private EventBus outBus;
-	protected SceneContainer c;
+
+	protected SceneContainer container;
+	protected Canvas canvas;
 
 	public EventBus getGameBus() {
 		return gameBus;
@@ -40,8 +43,9 @@ public abstract class Scene {
 	}
 
 	@Inject
-	public void setSceneContainer(SceneContainer c) {
-		this.c = c;
+	public void setSceneContainer(@Named("instance") SceneContainer c) {
+		this.container = c;
+		canvas = c.getCanvas();
 	}
 
 	public abstract void tick(float timeSeconds);
