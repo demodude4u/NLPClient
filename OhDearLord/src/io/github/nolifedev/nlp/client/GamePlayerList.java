@@ -1,9 +1,6 @@
-package io.github.nolifedev.nlp.client.scene.game;
+package io.github.nolifedev.nlp.client;
 
-import io.github.nolifedev.nlp.client.ChatPanel;
-import io.github.nolifedev.nlp.client.Game;
-import io.github.nolifedev.nlp.client.Player;
-import io.github.nolifedev.nlp.client.ServerPlayerList;
+import io.github.nolifedev.nlp.common.event.net.NetConnect;
 import io.github.nolifedev.nlp.common.event.net.op.Op000CPlayersJoinedGame;
 import io.github.nolifedev.nlp.common.event.net.op.Op000DPlayersLeftGame;
 
@@ -102,6 +99,11 @@ public class GamePlayerList extends JPanel {
 				}
 			}
 		});
+	}
+
+	@Subscribe
+	public void onConnect(NetConnect e) {
+		players.clear();
 	}
 
 	@Subscribe

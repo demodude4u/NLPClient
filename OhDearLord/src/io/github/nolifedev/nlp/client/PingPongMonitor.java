@@ -49,7 +49,7 @@ public class PingPongMonitor extends AbstractScheduledService {
 
 	@Override
 	protected void runOneIteration() throws Exception {
-		if (missingPong) {
+		if (missingPong && !socketConnection.isConnected()) {
 			gameBus.post(new NetDisconnect(true, "PingPong Timeout!"));
 			socketConnection.connect();
 		}

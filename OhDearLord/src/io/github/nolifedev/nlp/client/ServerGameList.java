@@ -1,5 +1,6 @@
 package io.github.nolifedev.nlp.client;
 
+import io.github.nolifedev.nlp.common.event.net.NetConnect;
 import io.github.nolifedev.nlp.common.event.net.op.Op0005DeletedGames;
 import io.github.nolifedev.nlp.common.event.net.op.Op0006CreatedGames;
 import io.github.nolifedev.nlp.common.event.net.op.Op0008LeaveJoinGame;
@@ -110,6 +111,11 @@ public class ServerGameList extends JPanel {
 
 	public Map<Integer, Game> getMapGames() {
 		return mapGames;
+	}
+
+	@Subscribe
+	public void onConnect(NetConnect e) {
+		mapGames.clear();
 	}
 
 	@Subscribe

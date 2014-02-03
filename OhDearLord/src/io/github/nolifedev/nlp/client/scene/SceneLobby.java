@@ -7,13 +7,18 @@ import io.github.nolifedev.nlp.common.event.net.op.Op0007CreateJoinGame;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Random;
 
@@ -62,12 +67,21 @@ public class SceneLobby extends Scene {
 		JPanel ret = new JPanel();
 
 		{
-			URL url;
 			try {
-				url = new URL(
+				final URL url = new URL(
 						"http://fc09.deviantart.net/fs71/i/2011/226/0/0/dj_pon_3_8_bit_by_ace12541-d46kwob.gif");
 				Icon icon = new ImageIcon(url);
 				JLabel label = new JLabel(icon);
+				label.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						try {
+							Desktop.getDesktop().browse(url.toURI());
+						} catch (IOException | URISyntaxException e1) {
+							e1.printStackTrace();
+						}
+					}
+				});
 				ret.add(label);
 			} catch (MalformedURLException e1) {
 				e1.printStackTrace();

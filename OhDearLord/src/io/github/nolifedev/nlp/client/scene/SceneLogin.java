@@ -1,18 +1,21 @@
 package io.github.nolifedev.nlp.client.scene;
 
-import io.github.nolifedev.nlp.common.event.net.op.Op0003Nickname;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
-import javax.swing.JButton;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import com.google.inject.Inject;
 
@@ -27,30 +30,35 @@ public class SceneLogin extends Scene {
 
 	private JPanel constructSouthPanel() {
 		JPanel ret = new JPanel();
+		ret.setBackground(Color.DARK_GRAY);
 
-		JLabel lblNickname = new JLabel("Nickname:");
-		ret.add(lblNickname);
+		JLabel lblConnecting = new JLabel("Connecting...");
+		lblConnecting.setForeground(Color.RED);
+		lblConnecting.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		ret.add(lblConnecting);
 
-		final JTextField txtNickname = new JTextField();
-		ActionListener loginActionListener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String nickname = txtNickname.getText();
-				if (nickname.isEmpty()) {
-					JOptionPane.showMessageDialog(southPanel.getParent(),
-							"Nickname is empty!");
-					return;
-				}
-				getOutBus().post(new Op0003Nickname(nickname));
+		{
+			try {
+				final URL url = new URL(
+						"http://fc09.deviantart.net/fs70/f/2012/034/7/b/derpy_hooves_wip_by_anonycat-d4ojcin.gif");
+				Icon icon = new ImageIcon(url);
+				JLabel label = new JLabel(icon);
+				label.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						try {
+							Desktop.getDesktop().browse(url.toURI());
+						} catch (IOException | URISyntaxException e1) {
+							e1.printStackTrace();
+						}
+					}
+				});
+				ret.add(label);
+
+			} catch (MalformedURLException e1) {
+				e1.printStackTrace();
 			}
-		};
-		txtNickname.addActionListener(loginActionListener);
-		ret.add(txtNickname);
-		txtNickname.setColumns(10);
-
-		JButton btnLogin = new JButton("Login");
-		btnLogin.addActionListener(loginActionListener);
-		ret.add(btnLogin);
+		}
 
 		return ret;
 	}

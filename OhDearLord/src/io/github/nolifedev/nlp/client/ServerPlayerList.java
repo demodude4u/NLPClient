@@ -1,6 +1,7 @@
 package io.github.nolifedev.nlp.client;
 
 import io.github.nolifedev.nlp.client.event.HaveMyPlayer;
+import io.github.nolifedev.nlp.common.event.net.NetConnect;
 import io.github.nolifedev.nlp.common.event.net.op.Op000BPlayersJoinedServer;
 import io.github.nolifedev.nlp.common.event.net.op.Op000FPlayersLeftServer;
 
@@ -119,6 +120,11 @@ public class ServerPlayerList extends JPanel {
 
 	public Player getMyPlayer() {
 		return myPlayer;
+	}
+
+	@Subscribe
+	public void onConnect(NetConnect e) {
+		mapPlayers.clear();
 	}
 
 	@Subscribe
