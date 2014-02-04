@@ -2,6 +2,8 @@ package io.github.nolifedev.nlp.client.scene;
 
 import io.github.nolifedev.nlp.client.Game;
 import io.github.nolifedev.nlp.client.GamePlayerList;
+import io.github.nolifedev.nlp.client.util.ImageLoader;
+import io.github.nolifedev.nlp.client.util.ImageLoader.LoadingImage;
 import io.github.nolifedev.nlp.common.event.net.op.Op0008LeaveJoinGame;
 
 import java.awt.BorderLayout;
@@ -12,10 +14,7 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
 
-import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -24,24 +23,23 @@ import javax.swing.border.TitledBorder;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class SceneGame extends Scene {
 
 	private final Color bgColor = Color.darkGray;
-	private BufferedImage bgStarImg;
 
 	private final JPanel sidePanel;
 
+	private final LoadingImage bgStarImgLoader;
+
 	@Inject
-	public SceneGame(Game game, GamePlayerList gamePlayerList) {
+	public SceneGame(Game game, GamePlayerList gamePlayerList,
+			ImageLoader imageLoader) {
 		sidePanel = constructSidePanel(game, gamePlayerList);
 
-		try {
-			bgStarImg = ImageIO.read(new URL("http://i.imgur.com/9THsqJk.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-			bgStarImg = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-		}
+		bgStarImgLoader = imageLoader.load("http://i.imgur.com/9THsqJk.png");
 	}
 
 	private JPanel constructSidePanel(Game game, GamePlayerList gamePlayerList) {
@@ -101,6 +99,7 @@ public class SceneGame extends Scene {
 	public void render(Graphics2D g) {
 		g.setColor(bgColor);
 		g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		BufferedImage bgStarImg = bgStarImgLoader.getImage();
 		g.drawImage(bgStarImg,
 				canvas.getWidth() / 2 - bgStarImg.getWidth() / 2,
 				canvas.getHeight() / 2 - bgStarImg.getHeight() / 2, canvas);

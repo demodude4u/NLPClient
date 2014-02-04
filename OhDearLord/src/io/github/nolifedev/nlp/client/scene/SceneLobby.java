@@ -30,7 +30,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class SceneLobby extends Scene {
 
 	private final JPanel sidePanel;
@@ -76,7 +78,10 @@ public class SceneLobby extends Scene {
 					@Override
 					public void mouseClicked(MouseEvent e) {
 						try {
-							Desktop.getDesktop().browse(url.toURI());
+							Desktop.getDesktop()
+									.browse(new URL(
+											"http://www.deviantart.com/morelikethis/252917867")
+											.toURI());
 						} catch (IOException | URISyntaxException e1) {
 							e1.printStackTrace();
 						}

@@ -18,7 +18,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class SceneLogin extends Scene {
 
 	private final JPanel southPanel;
@@ -47,7 +49,10 @@ public class SceneLogin extends Scene {
 					@Override
 					public void mouseClicked(MouseEvent e) {
 						try {
-							Desktop.getDesktop().browse(url.toURI());
+							Desktop.getDesktop()
+									.browse(new URL(
+											"http://www.deviantart.com/art/Derpy-Hooves-WIP-283078175")
+											.toURI());
 						} catch (IOException | URISyntaxException e1) {
 							e1.printStackTrace();
 						}

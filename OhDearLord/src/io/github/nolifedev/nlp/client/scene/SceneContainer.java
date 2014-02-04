@@ -7,9 +7,11 @@ import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
+import java.util.Map;
 
 import javax.swing.JPanel;
 
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -29,6 +31,9 @@ public class SceneContainer extends JPanel {
 
 	private final Injector injector;
 	private final Module module;
+
+	private final Map<Class<? extends Scene>, Injector> builtInjectors = Maps
+			.newHashMap();
 
 	@Inject
 	public SceneContainer(@Named("init") Class<? extends Scene> initialScene,
@@ -64,19 +69,22 @@ public class SceneContainer extends JPanel {
 		loadScene(initialScene, null);
 	}
 
-	public void loadScene(Class<? extends Scene> initialScene,
-			Module sceneModule) {
-		Injector injector;
-		if (sceneModule != null) {
-			injector = this.injector.createChildInjector(module, sceneModule);
-		} else {
-			injector = this.injector.createChildInjector(module);
+	public void loadScene(Class<? extends Scene> sceneClass, Module sceneModule) {
+		Injector injector = builtInjectors.get(sceneClass);
+		if (injector == null) {
+			if (sceneModule != null) {
+				injector = this.injector.createChildInjector(module,
+						sceneModule);
+			} else {
+				injector = this.injector.createChildInjector(module);
+			}
+			builtInjectors.put(sceneClass, injector);
 		}
 
 		if (loadedScene != null) {
 			loadedScene.onUnload();
 		}
-		Scene newScene = injector.getInstance(initialScene);
+		Scene newScene = injector.getInstance(sceneClass);
 		newScene.onLoad();
 		loadedScene = newScene;
 		System.out.println("##### Loaded Scene: "
